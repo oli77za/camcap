@@ -52,13 +52,15 @@ function App() {
 
     const src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
     videoCapRef.current?.read(src);
-    const videoMat = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-    cv.cvtColor(src, videoMat, cv.COLOR_RGBA2GRAY);
-    cv.imshow(canvas1, videoMat);
+    const grayscaledMat = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+    cv.cvtColor(src, grayscaledMat, cv.COLOR_RGBA2GRAY);
+    cv.imshow(canvas1, grayscaledMat);
 
+    const bilateralMat = new cv.Mat(video.height, video.width, cv.CV_8UC1);
+    cv.bilateralFilter(grayscaledMat, bilateralMat, 11, 17, 17);
 
     const blurMat = new cv.Mat(video.height, video.width, cv.CV_8UC1);
-    cv.GaussianBlur(videoMat, blurMat, new cv.Size(3, 3), 5, 0)
+    cv.GaussianBlur(bilateralMat, blurMat, new cv.Size(3, 3), 5, 0)
     cv.imshow(canvas2, blurMat);
 
     const cannyMat= new cv.Mat(video.height, video.width, cv.CV_8UC1);
@@ -92,7 +94,7 @@ function App() {
 
     for (const sortableCont of sortedContours) {
       const approx = new cv.Mat();
-      cv.approxPolyDP(sortableCont.contour, approx, 2, true);
+      cv.approxPolyDP(sortableCont.contour, approx, .02 * sortableCont.perimeterSize, true);
       // if (approx.rows === 4) {
       if (true) {
           // vec.push_back(approx);
